@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SVG Icon Normalisation Test</title>
+
+  <style>
+    :root{
+      --iconSize: 72px;
+      --gap: 16px;
+      --outline: 0;
+      --iconInvert: 0;
+    }
+
+    *{ box-sizing:border-box; }
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont,
+                   "Segoe UI", Roboto, Arial, sans-serif;
+      background:#f6f7f8;
+      color:#111;
+    }
+
+    header{
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e6e6e6;
+      padding: 14px 16px;
+      z-index: 10;
+    }
+
+    .row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px 18px;
+      align-items:center;
+    }
+
+    .control{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      white-space:nowrap;
+      font-size:14px;
+    }
+
+    input[type="range"]{ width: 220px; }
+
+    main{ padding: 18px 16px 40px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: var(--gap);
+    }
+
+    .card{
+      border:1px solid #e6e6e6;
+      border-radius:14px;
+      overflow:hidden;
+      background:#fff;
+    }
+
+    .stage{
+      height:170px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .stage.light{ background:#fff; }
+    .stage.dark{ background:#111317; }
+    .stage.checker{
+      background:
+        linear-gradient(45deg, #e9e9e9 25%, transparent 25%),
+        linear-gradient(-45deg, #e9e9e9 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #e9e9e9 75%),
+        linear-gradient(-45deg, transparent 75%, #e9e9e9 75%);
+      background-size: 22px 22px;
+      background-position: 0 0, 0 11px, 11px -11px, -11px 0px;
+    }
+
+    .iconWrap{
+      width: var(--iconSize);
+      height: var(--iconSize);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:relative;
+    }
+
+    .iconWrap::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      border: calc(var(--outline) * 1px)
+              dashed rgba(255,0,0,0.6);
+      border-radius:8px;
+      pointer-events:none;
+    }
+
+    img.icon{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+      filter: invert(var(--iconInvert));
+    }
+
+    .meta{
+      padding:10px 12px;
+      font-size:13px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    .file{
+      font-family: ui-monospace, SFMono-Regular,
+                   Menlo, Consolas, monospace;
+      font-size:12px;
+      color:#666;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="row">
+    <div class="control">
+      <strong>Icon size</strong>
+      <input id="size" type="range" min="24" max="180" value="72">
+      <span id="sizeVal">72px</span>
+    </div>
+
+    <div class="control">
+      <strong>Gap</strong>
+      <input id="gap" type="range" min="6" max="30" value="16">
+      <span id="gapVal">16px</span>
+    </div>
+
+    <div class="control">
+      <strong>Background</strong>
+      <select id="bg">
+        <option value="light">Light</option>
+        <option value="dark">Dark</option>
+        <option value="checker">Checker</option>
+      </select>
+    </div>
+
+    <div class="control">
+      <label>
+        <input id="invert" type="checkbox">
+        White icons
+      </label>
+    </div>
+
+    <div class="control">
+      <label>
+        <input id="outline" type="checkbox">
+        Outline box
+      </label>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>
+  const icons = [
+    "helmet",
+    "jacket",
+    "pants",
+    "boots",
+    "gloves",
+    "luggage",
+    "accessories",
+    "jacketpants1",
+    "jacketpants2"
+  ];
+
+  const grid = document.getElementById("grid");
+
+  grid.innerHTML = icons.map(name => `
+    <div class="card">
+      <div class="stage light">
+        <div class="iconWrap">
+          <img class="icon" src="icons/${name}.svg" alt="${name}">
+        </div>
+      </div>
+      <div class="meta">
+        <strong>${name}</strong>
+        <span class="file">${name}.svg</span>
+      </div>
+    </div>
+  `).join("");
+
+  const size = document.getElementById("size");
+  const gap = document.getElementById("gap");
+  const bg = document.getElementById("bg");
+  const outline = document.getElementById("outline");
+  const invert = document.getElementById("invert");
+
+  function apply(){
+    document.documentElement
+      .style.setProperty("--iconSize", size.value + "px");
+
+    document.documentElement
+      .style.setProperty("--gap", gap.value + "px");
+
+    document.documentElement
+      .style.setProperty("--outline", outline.checked ? 1 : 0);
+
+    document.documentElement
+      .style.setProperty("--iconInvert", invert.checked ? 1 : 0);
+
+    document.getElementById("sizeVal").textContent =
+      size.value + "px";
+
+    document.getElementById("gapVal").textContent =
+      gap.value + "px";
+
+    document.querySelectorAll(".stage").forEach(stage => {
+      stage.className = "stage " + bg.value;
+    });
+  }
+
+  [size, gap, bg, outline, invert].forEach(el => {
+    el.addEventListener("input", apply);
+    el.addEventListener("change", apply);
+  });
+
+  apply();
+</script>
+</body>
+</html>
